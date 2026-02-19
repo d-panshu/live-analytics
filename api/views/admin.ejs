@@ -11,7 +11,7 @@
   <script>
     const token = prompt("Enter Admin JWT:");
 
-    const socket = io("http://localhost:3000", {
+    const socket = io("/", {
         auth: { token }
     });
 
