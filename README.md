@@ -51,3 +51,11 @@ live-analytics/
 ├── nginx/              # Load Balancer & Reverse Proxy Configuration
 ├── docker-compose.yml  # Multi-container Orchestration
 └── README.md
+
+# Clone the repository
+git clone <your-repo-url>
+cd live-analytics
+
+# Start the full system with horizontal scaling
+# This spins up 2 API nodes and 3 Consumer workers automatically
+docker compose up --build -d --scale api=2 --scale consumer=3
