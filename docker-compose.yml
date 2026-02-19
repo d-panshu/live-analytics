@@ -54,5 +54,12 @@ services:
       - redis
       - kafka
 
+  consumer:
+    build: ./consumer
+    depends_on:
+      - kafka
+      - mongo
+
+
 volumes:
   mongo-data:
