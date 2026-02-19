@@ -1,5 +1,5 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/user.js");
@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.post("/register", async(req, res)=>{
     try{
+        console.log(req.body);
         const hashed = await bcrypt.hash(req.body.password, 10);
 
         const user = await User.create({
@@ -46,4 +47,4 @@ router.post("/login", async(req, res)=>{
     res.json({token});
 });
 
-mod.exports= router;
+module.exports= router;
