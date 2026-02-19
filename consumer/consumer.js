@@ -1,6 +1,6 @@
 const {Kafka} = require ("kafkajs")
 const mongoose = require("mongoose");
-const {addToBuffer} = require("./batchProcessor")
+const { addToBuffer, injectRedis } = require("./batchProcessor");
 const {createClient} = require('redis');
 
 
@@ -28,12 +28,20 @@ const redisClient = createClient({
     url:"redis://redis:6379"
 });
 
+const pubClient = createClient({
+  url: "redis://redis:6379"
+});
+
 redisClient.on("error", err => console.error("Redis Error:", err));
+pubClient.on("error", err => console.error("Pub Redis Error:", err));
 
 async function connectRedis() {
   await redisClient.connect();
+  await pubClient.connect();
+  injectRedis(redisClient, pubClient);
   console.log("Redis Connected (Consumer)");
 }
+
 
 async function start(){
     await mongoose.connect("mongodb://mongo:27017/live-analytics");
@@ -45,6 +53,8 @@ async function start(){
         fromBeginning: false
     });
     await connectRedis();
+
+
     await connectDLQProducer();
 
 

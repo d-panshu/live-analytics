@@ -1,28 +1,43 @@
 const Stream = require("./models/stream.js")
 let buffer=[];
+let redisClient;
+
+function injectRedis(client) {
+  redisClient = client;
+}
 
 const batch_size = 500;
 const flush_interval= 1000;
 
-async function flushBuffer(){
-    if(!buffer.length) return;
-    
-    const bulkops= buffer.map(event=>({
-        updateOne:
-        {
-            filter:{streamId:event.streamId},
-            update:{$inc:{likes:1}},
-            upsert: true
+let pubClient;
 
-        }
-    }));
-
-    await Stream.bulkWrite(bulkops);
-
-    console.log(`flushed ${buffer.length} events`);
-    buffer=[];
-
+function injectRedis(client, publisher) {
+  redisClient = client;
+  pubClient = publisher;
 }
+
+
+async function flushBuffer() {
+  if (!buffer.length) return;
+
+  const bulkOps = buffer.map(event => ({
+    updateOne: {
+      filter: { streamId: event.streamId },
+      update: { $inc: { likes: 1 } },
+      upsert: true
+    }
+  }));
+
+  await Stream.bulkWrite(bulkOps);
+
+  console.log(`Flushed ${buffer.length} events`);
+
+
+  await redisClient.publish("stream-updates", "updated");
+
+  buffer = [];
+}
+
 
 setInterval(flushBuffer, flush_interval);
 
@@ -34,4 +49,4 @@ function addToBuffer(event) {
   }
 }
 
-module.exports = { addToBuffer };
+module.exports = { addToBuffer , injectRedis};
