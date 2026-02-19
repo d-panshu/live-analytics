@@ -6,7 +6,7 @@ const flush_interval= 1000;
 
 async function flushBuffer(){
     if(!buffer.length) return;
-
+    
     const bulkops= buffer.map(event=>({
         updateOne:
         {
